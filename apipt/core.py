@@ -1,39 +1,42 @@
-import os
 import subprocess
+if __package__:
+    from .common import *
+else:
+    from common import *
 
-apt_path = '/var/lib/apt/lists'
 
-
-def update(output=True):
+def update():
     """
     Equivalent to apt update
     """
-    return subprocess.run('apt update'.split(), capture_output=not output)
+    return subprocess.run('apt update'.split())
 
 
-def upgrade(output=True):
+def upgrade():
     """
     Equivalent to apt upgrade
     """
-    return subprocess.run('apt upgrade'.split(), capture_output=not output)
+    print('Press any key if no [y/N] prompt.\n')
+    apt_run = subprocess.Popen('apt upgrade'.split(), stdin=subprocess.PIPE)
+    return apt_run.communicate(input().encode('utf-8'))
 
 
-def get_apt_packages(python_only=False):
-    packages = []
-    package_files = [file for file in os.listdir(apt_path) if file.endswith('Packages')]
-    if python_only:  # judge only once
-        for file in package_files:
-            with open(os.path.join(apt_path, file), 'r') as f:
-                for line in f:
-                    if line.startswith('Package: python3-'):
-                        packages.append(line[9:-1])  # remove 'Package:' and '\n'
-    else:
-        for file in package_files:
-            with open(os.path.join(apt_path, file), 'r') as f:
-                for line in f:
-                    if line.startswith('Package:'):
-                        packages.append(line[9:-1])  # remove 'Package:' and '\n'
-    return list(set(packages))
+def install(packages):
+    apt_command = ['apt', 'install']
+    pip_command = ['pip', 'install']
+    apt, pip = divide_packages(packages)
+
+    apt_command.extend(apt)
+    print(f'Running: ' + ' '.join(apt_command) + '\n' + 'Press any key if no [y/N] prompt.\n')
+    apt_run = subprocess.Popen(apt_command, stdin=subprocess.PIPE)
+    apt_run.communicate(input().encode('utf-8'))
+
+    pip_command.extend(pip)
+    print(f'Running: ' + ' '.join(pip_command) + '\n' + 'Press any key if no [y/N] prompt.\n')
+    pip_run = subprocess.Popen(pip_command, stdin=subprocess.PIPE)
+    pip_run.communicate(input().encode('utf-8'))
+
+    return True
 
 
 def execute():
