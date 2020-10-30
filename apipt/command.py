@@ -2,6 +2,13 @@ import subprocess
 from .common import *
 
 
+def show_default():
+    return print(
+        f'APIPT v{version}\n'
+        'Run \'apipt --help\' for help.'
+    )
+
+
 def show_help():
     return print(help_message)
 
