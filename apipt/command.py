@@ -1,8 +1,5 @@
 import subprocess
-if __package__:
-    from .common import *
-else:
-    from common import *
+from .common import *
 
 
 def show_help():

@@ -1,13 +1,14 @@
 import os
 import subprocess
 from setuptools import setup, find_packages
+from setuptools.command.install import install
 
 with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
     lines = [line.strip() for line in f]
     requirements = [line for line in lines if line and not line.startswith('#')]
 
 
-def detect_os():
+def detect():
     if os.name != 'posix':
         raise RuntimeError('Sorry, this package can only work on Linux.')
     try:
@@ -19,6 +20,12 @@ def detect_os():
     return True
 
 
+class DetectOS(install):
+    def run(self):
+        detect()
+        install.run(self)
+
+
 setup(
     name='apipt',
     version='0.1',
@@ -27,12 +34,12 @@ setup(
     author='KumaTea',
     author_email='contact@maku.ml',
     license='MIT',
-    keywords=('apipt',),
+    keywords=['apipt'],
     packages=find_packages(),
     platforms='posix',
     python_requires='>=3.6',
     install_requires=requirements,
-    cmdclass={'install': detect_os},
+    cmdclass={'install': DetectOS},
     entry_points={
         'console_scripts': [
             'apipt=apipt.app:main'

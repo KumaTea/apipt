@@ -1,10 +1,6 @@
 import sys
-if __package__:
-    from .command import version
-    from .command import *
-else:
-    from command import version
-    from command import *
+from .command import version
+from .command import *
 
 
 args = sys.argv
