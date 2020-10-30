@@ -1,1 +1,1 @@
-from .core import execute
+from .command import execute

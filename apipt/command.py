@@ -5,6 +5,14 @@ else:
     from common import *
 
 
+def show_help():
+    return print(help_message)
+
+
+def show_version():
+    return print(f'APIPT v.{version}')
+
+
 def update():
     """
     Equivalent to apt update
@@ -24,6 +32,22 @@ def upgrade():
 def install(packages):
     apt_command = ['apt', 'install']
     pip_command = ['pip', 'install']
+    if '-y' in packages:
+        apt_command.append('-y')
+        pip_command.append('-y')
+        packages.remove('-y')
+    if '-r' in packages:
+        try:
+            file = packages[packages.index('-r')+1]
+        except IndexError:
+            file = None
+            exit('No file specified.')
+        with open(file, 'r') as f:
+            p = f.read().splitlines()
+        packages.remove(file)
+        packages.remove('-r')
+        packages.extend(p)
+
     apt, pip = divide_packages(packages)
 
     apt_command.extend(apt)
@@ -37,7 +61,3 @@ def install(packages):
     pip_run.communicate(input().encode('utf-8'))
 
     return True
-
-
-def execute():
-    pass
