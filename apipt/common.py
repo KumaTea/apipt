@@ -21,6 +21,7 @@ def get_apt_packages(python=True):
                         python_packages.append(line[9:-1])  # remove 'Package:' and '\n'
                     else:
                         packages.append(line[9:-1])
+    packages.extend(python_packages)
     return list(set(packages)), list(set(python_packages))
 
 

@@ -2,11 +2,11 @@ import subprocess
 from .common import *
 
 
-def show_default():
-    return print(
-        f'APIPT v{version}\n'
-        'Run \'apipt --help\' for help.'
-    )
+def show_default(unknown=False):
+    message = f'APIPT v{version}\nRun \'apipt --help\' for help.'
+    if unknown:
+        message = 'Unknown command.\n' + message
+    return print(message)
 
 
 def show_help():
@@ -14,14 +14,15 @@ def show_help():
 
 
 def show_version():
-    return print(f'APIPT v.{version}')
+    return print(f'APIPT v{version}')
 
 
 def update():
     """
     Equivalent to apt update
     """
-    return subprocess.run('apt update'.split())
+    subprocess.run('apt update'.split())
+    # return True
 
 
 def upgrade():
@@ -30,10 +31,13 @@ def upgrade():
     """
     print('Press any key if no [y/N] prompt.\n')
     apt_run = subprocess.Popen('apt upgrade'.split(), stdin=subprocess.PIPE)
-    return apt_run.communicate(input().encode('utf-8'))
+    apt_run.communicate(input().encode('utf-8'))
+    # return True
 
 
 def install(packages):
+    if not packages:
+        exit('No package specified.')
     apt_command = ['apt', 'install']
     pip_command = ['pip', 'install']
     if '-y' in packages:
@@ -47,21 +51,24 @@ def install(packages):
             file = None
             exit('No file specified.')
         with open(file, 'r') as f:
-            p = f.read().splitlines()
+            lines = [line.strip() for line in f]
+            p = [line for line in lines if line and not line.startswith('#')]
         packages.remove(file)
         packages.remove('-r')
         packages.extend(p)
+    while '' in packages:
+        packages.remove('')
 
     apt, pip = divide_packages(packages)
+    if apt:
+        apt_command.extend(apt)
+        print(f'Running: ' + ' '.join(apt_command) + '\n' + 'Press any key if no [y/N] prompt.\n')
+        apt_run = subprocess.Popen(apt_command, stdin=subprocess.PIPE)
+        apt_run.communicate(input().encode('utf-8'))
+    if pip:
+        pip_command.extend(pip)
+        print(f'Running: ' + ' '.join(pip_command) + '\n' + 'Press any key if no [y/N] prompt.\n')
+        pip_run = subprocess.Popen(pip_command, stdin=subprocess.PIPE)
+        pip_run.communicate(input().encode('utf-8'))
 
-    apt_command.extend(apt)
-    print(f'Running: ' + ' '.join(apt_command) + '\n' + 'Press any key if no [y/N] prompt.\n')
-    apt_run = subprocess.Popen(apt_command, stdin=subprocess.PIPE)
-    apt_run.communicate(input().encode('utf-8'))
-
-    pip_command.extend(pip)
-    print(f'Running: ' + ' '.join(pip_command) + '\n' + 'Press any key if no [y/N] prompt.\n')
-    pip_run = subprocess.Popen(pip_command, stdin=subprocess.PIPE)
-    pip_run.communicate(input().encode('utf-8'))
-
-    return True
+    # return True
