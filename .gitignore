@@ -3,3 +3,6 @@ __pycache__
 token*
 *.log
 *.tmp
+*.egg-info
+build
+dist

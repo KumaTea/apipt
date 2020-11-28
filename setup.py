@@ -31,7 +31,7 @@ class DetectOS(install):
 
 setup(
     name='apipt',
-    version='0.1.1a',
+    version='0.1.1b',
     description='Install Python packages by apt',
     long_description=long_description,
     long_description_content_type="text/markdown",
