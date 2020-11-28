@@ -2,7 +2,7 @@ import os
 import lz4.frame
 
 
-version = '0.1.1b'
+version = '0.1.1'
 apt_path = '/var/lib/apt/lists'
 help_message = ''
 
@@ -40,7 +40,7 @@ def divide_packages(packages):
     pip = []
     # DO NOT use apt = pip = [] since they will be tied up
     for package in packages:
-        if package.startswith('python'):
+        if package.startswith('python3-'):
             apt.append(package)
         elif f'python3-{package}' in apt_py_list:
             apt.append(f'python3-{package}')
