@@ -1,7 +1,8 @@
 import os
+import lz4.frame
 
 
-version = '0.1'
+version = '0.1.1a'
 apt_path = '/var/lib/apt/lists'
 help_message = ''
 
@@ -10,7 +11,8 @@ def get_apt_packages(python=True):
     packages = []
     python_packages = []
     package_files = [file for file in os.listdir(apt_path) if file.endswith('Packages')]
-    if not package_files:
+    lz4_files = [file for file in os.listdir(apt_path) if file.endswith('Packages.lz4')]
+    if not package_files or lz4_files:
         exit('Cannot read APT packages.')
     for file in package_files:
         # with open(os.path.join(apt_path, file), 'r') as f:
@@ -19,9 +21,15 @@ def get_apt_packages(python=True):
                 if line.startswith('Package:'):
                     if python and line.startswith('Package: python3-'):
                         python_packages.append(line[9:-1])  # remove 'Package:' and '\n'
-                    else:
-                        packages.append(line[9:-1])
-    packages.extend(python_packages)
+                    packages.append(line[9:-1])
+    for file in lz4_files:
+        with lz4.frame.open(f'{apt_path}/{file}', 'r') as f:
+            file_content = f.read().decode().splitlines()
+            for line in file_content:
+                if line.startswith('Package:'):
+                    if python and line.startswith('Package: python3-'):
+                        python_packages.append(line[9:-1])  # remove 'Package:' and '\n'
+                    packages.append(line[9:-1])
     return list(set(packages)), list(set(python_packages))
 
 
